@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  # Nginx (统一入口，HTTP-only)
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "${NGINX_HTTP_PORT}:80"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d  # Nginx配置
+      - ./nextcloud/data:/var/www/html/data:ro  # 只读挂载Nextcloud文件
+    depends_on:
+      - nextcloud
+      - onlyoffice
+      - jitsi_web
+
+  # Nextcloud (使用 PostgreSQL 15)
+  nextcloud:
+    image: nextcloud:latest
+    environment:
+      - POSTGRES_HOST=nextcloud_db
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - ./nextcloud/data:/var/www/html/data
+      - ./nextcloud/config:/var/www/html/config
+    networks:
+      - unistack_network
+    depends_on:
+      - nextcloud_db
+
+  # PostgreSQL 15 (最新稳定版)
+  nextcloud_db:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - ./nextcloud/postgres:/var/lib/postgresql/data
+    networks:
+      - unistack_network
+
+  # OnlyOffice
+  onlyoffice:
+    image: onlyoffice/documentserver
+    networks:
+      - unistack_network
+    volumes:
+      - ./onlyoffice/data:/var/www/onlyoffice/Data
+
+  # Jitsi Meet
+  jitsi_web:
+    image: jitsi/web
+    volumes:
+      - ./jitsi/web:/config
+    environment:
+      - ENABLE_AUTH=0
+      - JICOFO_COMPONENT_SECRET=${JICOFO_COMPONENT_SECRET}
+      - JICOFO_AUTH_PASSWORD=${JICOFO_AUTH_PASSWORD}
+      - JVB_AUTH_PASSWORD=${JVB_AUTH_PASSWORD}
+    networks:
+      - unistack_network
+
+networks:
+  unistack_network:
+    name: ${NETWORK_NAME}
+    driver: bridge
