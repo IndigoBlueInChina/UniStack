@@ -14,6 +14,8 @@ services:
       - onlyoffice
       - jitsi_web
       - dozzle
+    networks:
+      - unistack_network
 
   # Nextcloud (使用 PostgreSQL 15)
   nextcloud:
@@ -76,5 +78,5 @@ services:
 
 networks:
   unistack_network:
-    name: ${NETWORK_NAME}
+    name: unistack_network
     driver: bridge
