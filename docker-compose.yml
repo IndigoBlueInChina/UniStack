@@ -13,6 +13,7 @@ services:
       - nextcloud
       - onlyoffice
       - dozzle
+      - jitsi-web
     networks:
       - unistack_network
 
@@ -59,6 +60,75 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - DOZZLE_BASE=/logs
+    networks:
+      - unistack_network
+      
+  # Jitsi Meet 组件
+  # XMPP 服务器
+  prosody:
+    image: jitsi/prosody:stable-7001
+    restart: unless-stopped
+    volumes:
+      - ./jitsi/prosody/config:/config
+      - ./jitsi/prosody/prosody-plugins-custom:/prosody-plugins-custom
+    environment:
+      - XMPP_DOMAIN=meet.jitsi
+      - JICOFO_COMPONENT_SECRET=${JICOFO_COMPONENT_SECRET}
+      - JICOFO_AUTH_PASSWORD=${JICOFO_AUTH_PASSWORD}
+      - JVB_AUTH_PASSWORD=${JVB_AUTH_PASSWORD}
+    networks:
+      - unistack_network
+
+  # 会议焦点组件
+  jicofo:
+    image: jitsi/jicofo:stable-7001
+    restart: unless-stopped
+    volumes:
+      - ./jitsi/jicofo:/config
+    environment:
+      - XMPP_DOMAIN=meet.jitsi
+      - XMPP_SERVER=prosody
+      - JICOFO_COMPONENT_SECRET=${JICOFO_COMPONENT_SECRET}
+      - JICOFO_AUTH_PASSWORD=${JICOFO_AUTH_PASSWORD}
+    depends_on:
+      - prosody
+    networks:
+      - unistack_network
+
+  # 视频桥接器
+  jvb:
+    image: jitsi/jvb:stable-7001
+    restart: unless-stopped
+    ports:
+      - "10000:10000/udp"
+    volumes:
+      - ./jitsi/jvb:/config
+    environment:
+      - XMPP_DOMAIN=meet.jitsi
+      - XMPP_SERVER=prosody
+      - JVB_AUTH_PASSWORD=${JVB_AUTH_PASSWORD}
+    depends_on:
+      - prosody
+    networks:
+      - unistack_network
+
+  # Jitsi Web 界面
+  jitsi-web:
+    image: jitsi/web:stable-7001
+    restart: unless-stopped
+    volumes:
+      - ./jitsi/web:/config
+    environment:
+      - ENABLE_AUTH=0
+      - PUBLIC_URL=http://your-domain.com/meet
+      - XMPP_DOMAIN=meet.jitsi
+      - XMPP_SERVER=prosody
+      - XMPP_BOSH_URL_BASE=http://prosody:5280
+      - JICOFO_AUTH_PASSWORD=${JICOFO_AUTH_PASSWORD}
+    depends_on:
+      - prosody
+      - jicofo
+      - jvb
     networks:
       - unistack_network
 
