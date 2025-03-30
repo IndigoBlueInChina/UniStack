@@ -52,6 +52,9 @@ services:
       - unistack_network
     volumes:
       - ./onlyoffice/data:/var/www/onlyoffice/Data
+    environment:
+      - JWT_ENABLED=false
+      - WOPI_ENABLED=false
 
   # Dozzle 日志系统
   dozzle:
