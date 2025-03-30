@@ -139,15 +139,19 @@ services:
       - ./jitsi/web:/config
     environment:
       - ENABLE_AUTH=0
-      - PUBLIC_URL=http://your-domain.com/meet
+      - PUBLIC_URL=http://223.254.128.156/meet
       - XMPP_DOMAIN=meet.jitsi
       - XMPP_SERVER=prosody
       - XMPP_BOSH_URL_BASE=http://prosody:5280
       - JICOFO_AUTH_PASSWORD=${JICOFO_AUTH_PASSWORD}
-      # 添加以下环境变量
       - XMPP_AUTH_DOMAIN=auth.meet.jitsi
       - XMPP_MUC_DOMAIN=muc.meet.jitsi
       - XMPP_INTERNAL_MUC_DOMAIN=internal-muc.meet.jitsi
+      # Add these important settings for subpath deployment
+      - SUBDOMAINS=false
+      - ENABLE_SUBDOMAINS=false
+      - ENABLE_XMPP_WEBSOCKET=false
+      - TZ=Asia/Shanghai
     depends_on:
       - prosody
       - jicofo
