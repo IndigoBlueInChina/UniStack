@@ -13,6 +13,7 @@ services:
       - nextcloud
       - onlyoffice
       - jitsi_web
+      - dozzle
 
   # Nextcloud (使用 PostgreSQL 15)
   nextcloud:
@@ -60,6 +61,16 @@ services:
       - JICOFO_COMPONENT_SECRET=${JICOFO_COMPONENT_SECRET}
       - JICOFO_AUTH_PASSWORD=${JICOFO_AUTH_PASSWORD}
       - JVB_AUTH_PASSWORD=${JVB_AUTH_PASSWORD}
+    networks:
+      - unistack_network
+
+  # Dozzle 日志系统
+  dozzle:
+    image: amir20/dozzle:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DOZZLE_BASE=/logs
     networks:
       - unistack_network
 
