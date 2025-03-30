@@ -1,0 +1,72 @@
+version: '3'
+
+services:
+  # Frontend
+  web:
+    image: jitsi/web:stable-7001
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./web:/config
+    environment:
+      - ENABLE_AUTH=0
+      - PUBLIC_URL=http://your-domain.com/meet
+      - XMPP_DOMAIN=meet.jitsi
+      - XMPP_SERVER=xmpp.meet.jitsi
+      - XMPP_BOSH_URL_BASE=http://xmpp.meet.jitsi:5280
+    networks:
+      - unistack_network
+      - meet.jitsi
+
+  # XMPP server
+  prosody:
+    image: jitsi/prosody:stable-7001
+    restart: unless-stopped
+    volumes:
+      - ./prosody/config:/config
+      - ./prosody/prosody-plugins-custom:/prosody-plugins-custom
+    environment:
+      - XMPP_DOMAIN=meet.jitsi
+      - JICOFO_COMPONENT_SECRET=${JICOFO_COMPONENT_SECRET}
+      - JICOFO_AUTH_PASSWORD=${JICOFO_AUTH_PASSWORD}
+      - JVB_AUTH_PASSWORD=${JVB_AUTH_PASSWORD}
+    networks:
+      - meet.jitsi
+
+  # Focus component
+  jicofo:
+    image: jitsi/jicofo:stable-7001
+    restart: unless-stopped
+    volumes:
+      - ./jicofo:/config
+    environment:
+      - XMPP_DOMAIN=meet.jitsi
+      - JICOFO_COMPONENT_SECRET=${JICOFO_COMPONENT_SECRET}
+      - JICOFO_AUTH_PASSWORD=${JICOFO_AUTH_PASSWORD}
+    depends_on:
+      - prosody
+    networks:
+      - meet.jitsi
+
+  # Video bridge
+  jvb:
+    image: jitsi/jvb:stable-7001
+    restart: unless-stopped
+    ports:
+      - "10000:10000/udp"
+    volumes:
+      - ./jvb:/config
+    environment:
+      - XMPP_DOMAIN=meet.jitsi
+      - JVB_AUTH_PASSWORD=${JVB_AUTH_PASSWORD}
+    depends_on:
+      - prosody
+    networks:
+      - meet.jitsi
+
+networks:
+  meet.jitsi:
+    driver: bridge
+  unistack_network:
+    external: true

@@ -12,7 +12,6 @@ services:
     depends_on:
       - nextcloud
       - onlyoffice
-      - jitsi_web
       - dozzle
     networks:
       - unistack_network
@@ -52,19 +51,6 @@ services:
       - unistack_network
     volumes:
       - ./onlyoffice/data:/var/www/onlyoffice/Data
-
-  # Jitsi Meet
-  jitsi_web:
-    image: jitsi/web:stable-7001
-    volumes:
-      - ./jitsi/web:/config
-    environment:
-      - ENABLE_AUTH=0
-      - JICOFO_COMPONENT_SECRET=${JICOFO_COMPONENT_SECRET}
-      - JICOFO_AUTH_PASSWORD=${JICOFO_AUTH_PASSWORD}
-      - JVB_AUTH_PASSWORD=${JVB_AUTH_PASSWORD}
-    networks:
-      - unistack_network
 
   # Dozzle 日志系统
   dozzle:
