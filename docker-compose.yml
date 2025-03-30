@@ -73,10 +73,12 @@ services:
       - ./jitsi/prosody/prosody-plugins-custom:/prosody-plugins-custom
     environment:
       - XMPP_DOMAIN=meet.jitsi
-      # 添加以下必要的环境变量
       - XMPP_AUTH_DOMAIN=auth.meet.jitsi
       - XMPP_MUC_DOMAIN=muc.meet.jitsi
       - XMPP_INTERNAL_MUC_DOMAIN=internal-muc.meet.jitsi
+      - JVB_AUTH_USER=jvb
+      - JVB_BREWERY_MUC=jvbbrewery
+      - JICOFO_AUTH_USER=focus
       - JICOFO_COMPONENT_SECRET=${JICOFO_COMPONENT_SECRET}
       - JICOFO_AUTH_PASSWORD=${JICOFO_AUTH_PASSWORD}
       - JVB_AUTH_PASSWORD=${JVB_AUTH_PASSWORD}
@@ -117,6 +119,7 @@ services:
       - XMPP_SERVER=prosody
       - XMPP_AUTH_DOMAIN=auth.meet.jitsi
       - JVB_AUTH_PASSWORD=${JVB_AUTH_PASSWORD}
+      - JVB_AUTH_USER=jvb
       - JVB_BREWERY_MUC=jvbbrewery
       - JVB_PORT=10000
       - JVB_XMPP_USER=jvb
