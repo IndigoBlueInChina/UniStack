@@ -53,7 +53,7 @@ services:
 
   # Jitsi Meet
   jitsi_web:
-    image: jitsi/web
+    image: jitsi/web:stable-7001
     volumes:
       - ./jitsi/web:/config
     environment:
